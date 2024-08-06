@@ -17,33 +17,37 @@ export interface Repo {
 }
 
 class GitHubService {
-    private cancelTokenSource: CancelTokenSource | null = null;
+    private cancelTokenSources: { [key: string]: CancelTokenSource | null } = {
+        getUsers: null,
+        getUserDetails: null,
+        getUserRepos: null
+    };
 
-    private createCancelToken() {
-        if (this.cancelTokenSource) {
-            this.cancelTokenSource.cancel('Operation canceled due to new request.');
+    private createCancelToken(requestType: string) {
+        if (this.cancelTokenSources[requestType]) {
+            this.cancelTokenSources[requestType]!.cancel(`Operation canceled due to new ${requestType} request.`);
         }
-        this.cancelTokenSource = axios.CancelToken.source();
-        return this.cancelTokenSource.token;
+        this.cancelTokenSources[requestType] = axios.CancelToken.source();
+        return this.cancelTokenSources[requestType]!.token;
     }
 
     async getUsers(since: number): Promise<{ users: User[]; next: string }> {
         const response = await api.get(`/users?since=${since}`, {
-            cancelToken: this.createCancelToken(),
+            cancelToken: this.createCancelToken('getUsers'),
         });
         return response.data;
     }
 
     async getUserDetails(username: string): Promise<User> {
         const response = await api.get(`/users/${username}/details`, {
-            cancelToken: this.createCancelToken(),
+            cancelToken: this.createCancelToken('getUserDetails'),
         });
         return response.data;
     }
 
     async getUserRepos(username: string): Promise<Repo[]> {
         const response = await api.get(`/users/${username}/repos`, {
-            cancelToken: this.createCancelToken(),
+            cancelToken: this.createCancelToken('getUserRepos'),
         });
         return response.data;
     }

@@ -7,12 +7,12 @@ import { useUserDetails, useUserRepos } from '@hooks/useGitHubApi';
 const UserDetail: React.FC = () => {
     const { username } = useParams<{ username: string }>();
 
+    const { user, loading: userDetailsLoading } = useUserDetails(username || '');
+    const { repos, loading: userReposLoading } = useUserRepos(username || '');
+
     if (!username) {
         return <Navigate to="/" />;
     }
-
-    const { user, loading: userDetailsLoading } = useUserDetails(username);
-    const { repos, loading: userReposLoading } = useUserRepos(username);
 
     if (userDetailsLoading || userReposLoading) {
         return <p>Loading...</p>;

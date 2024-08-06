@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import UserGrid from '@components/organisms/UserGrid';
 import UserDetail from '@pages/UserDetail';
@@ -6,7 +6,13 @@ import Header from '@components/organisms/Header';
 import { useUsers } from '@hooks/useGitHubApi';
 
 const App: React.FC = () => {
-    const { users, loading: usersLoading } = useUsers(0); // Initial load
+    const [page, setPage] = useState<number>(0);
+    const since = page * 45 + 1;
+    const { users, loading: usersLoading } = useUsers(since);
+
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+    };
 
     return (
         <Router>
@@ -14,11 +20,13 @@ const App: React.FC = () => {
             <div className="container mt-4">
                 <Routes>
                     <Route path="/" element={
-                        usersLoading ? (
-                            <p>Loading users...</p>
-                        ) : (
-                            <UserGrid users={users} onUserClick={(login) => window.location.href = `/${login}/details`} />
-                        )
+                        <UserGrid
+                            users={users}
+                            loading={usersLoading}
+                            onUserClick={(login) => window.location.href = `/${login}/details`}
+                            onPageChange={handlePageChange}
+                            page={page}
+                        />
                     } />
                     <Route path="/:username/details" element={<UserDetail />} />
                 </Routes>

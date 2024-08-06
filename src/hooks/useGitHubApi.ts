@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import GitHubService, {Repo, User} from '../services/GitHubService';
 import axios from "axios";
 
-export const useUsers = (since: number) => {
+export const useUsers = (since: number = 1) => {
     const [users, setUsers] = useState<User[]>([]);
     const [next, setNext] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
@@ -12,6 +12,8 @@ export const useUsers = (since: number) => {
             setLoading(true);
             try {
                 const { users, next } = await GitHubService.getUsers(since);
+
+                console.log(users);
                 setUsers(users);
                 setNext(next);
             } catch (error) {
